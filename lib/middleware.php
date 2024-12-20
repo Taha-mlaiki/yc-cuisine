@@ -1,5 +1,4 @@
 <?php
-session_start();
 
 $authRoutes = [
     "index.php",
@@ -23,23 +22,19 @@ $currentPage = basename($_SERVER["PHP_SELF"]);
 $role = isset($_SESSION['role']) ? $_SESSION['role'] : null;
 
 
-
 // if the user already auth and and the current page is an auth page
-// redirect him depend on his role
-if($role && in_array($currentPage,$authRoutes)){
-    $page = "home";
-    if($role == "admin"){
-        $page = "dashboard";
-    }
-    header("location: {$page}.php");
+// redirect him to the home page
+if ($role && in_array($currentPage, $authRoutes)) {
+    header("location: home.php");
 }
 
 //  if the user is not loged in and the page is admin page or user page
 // redirect him to login page
-if(!$role && in_array($currentPage,$userRoutes) || in_array($currentPage,$adminRoutes)){
+if (!$role && (in_array($currentPage, $userRoutes) || in_array($currentPage, $adminRoutes))) {
     header("location: index.php");
+    exit;
 }
-
-if($role == "user" && in_array($currentPage,$adminRoutes)){
+if ($role == "user" && in_array($currentPage, $adminRoutes)) {
     header("location: home.php");
 }
+

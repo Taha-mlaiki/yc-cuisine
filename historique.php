@@ -1,3 +1,4 @@
+
 <?php include "./inc/header.php"  ?>
 <?php include "./inc/navbar.php"  ?>
 <main class="max-w-screen-xl mx-auto px-5 ">

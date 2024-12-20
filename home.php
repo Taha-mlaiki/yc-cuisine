@@ -1,3 +1,12 @@
+<?php
+include "./inc/connectDB.php";
+$stm = $conn->prepare("SELECT * FROM menu");
+$stm->execute();
+$res = $stm->get_result();
+if ($res->num_rows > 0) {
+    $menus = $res->fetch_assoc();
+}
+?>
 <?php include "./inc/header.php" ?>
 <header class="h-screen bg-black/90 flex flex-col">
     <?php include "./inc/navbar.php" ?>
@@ -22,22 +31,25 @@
 </header>
 <main class="max-w-7xl w-full mx-auto ">
     <h1 class="font-bold text-6xl mt-10 text-primary text-center">Menus</h1>
-    <div class="grid md:grid-cols-2 gap-10 lg:grid-cols-3 my-20">
-        <div class="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-            <a href="#">
-                <img class="w-72 mb-2 mx-auto" src="./assets/hero-illustration.png" alt="product image" />
-            </a>
-            <div class="px-5 pb-5">
-                <a href="#">
-                    <h5 class="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">Apple Watch Series 7 GPS</h5>
-                </a>
-                <p class="my-2 text-neutral-700">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Vero, commodi doloribus, aliquid odio pariatur nisi natus reprehenderit perspiciatis vel aperiam suscipit.</p>
-                <div class="flex items-center justify-end mt-2">
-                    <a href="#" class="text-white  bg-primary hover:bg-primary/90 font-medium rounded-lg text-sm px-5 py-2.5 text-center ">View Dishes</a>
+    <?php if (!empty($menus) && count($menus) > 0) : ?>
+        <div class="grid md:grid-cols-2 gap-10 lg:grid-cols-3 my-20">
+            <?php foreach ($menus as $menu): ?>
+                <div class="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                    <a href="#">
+                        <img class="w-72 mb-2 mx-auto" src="<?= $menu["image"] ?>" alt="product image" />
+                    </a>
+                    <div class="px-5 pb-5">
+                        <h5 class="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white"><?= $menu["name"] ?></h5>
+                        <p class="my-2 text-neutral-700"><?= $menu["description"] ?></p>
+                        <div class="flex items-center justify-end mt-2">
+                            <a href="./menuDetails.php?menuId=<?= $menu["id"] ?>" class="text-white  bg-primary hover:bg-primary/90 font-medium rounded-lg text-sm px-5 py-2.5 text-center ">View Dishes</a>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            <?php endforeach; ?>
         </div>
-    </div>
-
+    <?php else : ?>
+        <p class="text-center text-gray-500 my-20">No menus available at the moment.</p>
+    <?php endif; ?>
 </main>
 <?php include "./inc/footer.php" ?>

@@ -1,7 +1,6 @@
 <?php
 include "./lib/validateInput.php";
 include "./inc/connectDB.php";
-session_start();
 
 $errors = [];
 
@@ -37,7 +36,6 @@ if (isset($_POST['login'])) {
                 $_SESSION["username"] =  $data["username"];
                 $_SESSION["email"] =  $data["email"];
                 $_SESSION["role"] = $data["role"];
-                header("location: home.php");
             }
         } else {
             $errors["account"] = "Account does not exist";
