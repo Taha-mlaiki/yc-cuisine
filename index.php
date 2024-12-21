@@ -1,5 +1,5 @@
 <?php include "./inc/header.php" ?>
-<?php include "./actions/login.php" ?>
+<?php include "./actions/auth/login.php" ?>
 <?php include "./lib/middleware.php" ?>
 <main class=" flex items-center justify-center bg-black/90 text-white h-screen">
     <div class="max-w-xl w-full">

@@ -1,6 +1,6 @@
 <?php include "./inc/header.php" ?>
 <?php include "./inc/connectDB.php" ?>
-<?php include "./actions/signup.php" ?>
+<?php include "./actions/auth/signup.php" ?>
 <?php include "./lib/middleware.php" ?>
 <main class=" flex items-center relative justify-center h-screen bg-black/90 text-white">
     <?= isset($toast) ? $toast : $toast ?>

@@ -1,5 +1,5 @@
 <?php 
-include "./actions/singout.php" ;
+include "./actions/auth/singout.php" ;
 ?>
 <div>
     <nav class="bg-black/90 border-gray-200 dark:bg-gray-900">

@@ -1,4 +1,14 @@
+<?php
+include "./inc/connectDB.php";
+include "./actions/dish/create_update.php";
+$stm = $conn->prepare("SELECT * FROM dish");
+$stm->execute();
+$res = $stm->get_result();
+if ($res) {
+    $dishes = $res->fetch_all(MYSQLI_ASSOC);
+}
 
+?>
 <?php include "./inc/header.php" ?>
 <div class="min-h-screen flex flex-col">
     <div class="bg-black">
@@ -44,74 +54,45 @@
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
                             <th scope="col" class="px-6 py-3">
-                                Product name
+                                Image
                             </th>
                             <th scope="col" class="px-6 py-3">
-                                Color
+                                Name
                             </th>
                             <th scope="col" class="px-6 py-3">
-                                Category
+                                Description
                             </th>
                             <th scope="col" class="px-6 py-3">
-                                Price
-                            </th>
-                            <th scope="col" class="px-6 py-3">
-                                <span class="sr-only">Edit</span>
+                                Actions
                             </th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                Apple MacBook Pro 17"
-                            </th>
-                            <td class="px-6 py-4">
-                                Silver
-                            </td>
-                            <td class="px-6 py-4">
-                                Laptop
-                            </td>
-                            <td class="px-6 py-4">
-                                $2999
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-                            </td>
-                        </tr>
-                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                Microsoft Surface Pro
-                            </th>
-                            <td class="px-6 py-4">
-                                White
-                            </td>
-                            <td class="px-6 py-4">
-                                Laptop PC
-                            </td>
-                            <td class="px-6 py-4">
-                                $1999
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-                            </td>
-                        </tr>
-                        <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600">
-                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                Magic Mouse 2
-                            </th>
-                            <td class="px-6 py-4">
-                                Black
-                            </td>
-                            <td class="px-6 py-4">
-                                Accessories
-                            </td>
-                            <td class="px-6 py-4">
-                                $99
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-                            </td>
-                        </tr>
+                        <?php if (isset($dishes) && count($dishes) > 0):  ?>
+                            <?php foreach ($dishes as $dish) : ?>
+                                <tr class="bg-white items-center border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                        <img src="<?= $dish["image_url"] ?>" class="w-10 rounded-sm" alt="">
+                                    </th>
+                                    <td class="px-6 py-4">
+                                        <?= $dish["name"] ?>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <?= $dish["description"] ?>
+                                    </td>
+                                    <td class=" py-5 flex items-center gap-x-2">
+                                        <button onclick='editDish(<?= json_encode($dish); ?>)' class="text-white bg-green-500 px-3 py-0.5 rounded-lg">Edit</button>
+                                        <button class="text-white bg-red-500 px-3 py-0.5 rounded-lg">Delete</button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else : ?>
+                            <tr>
+                                <th colspan="100%" class="text-center text-neutral-700 w-full py-4">
+                                    No dish available.
+                                </th>
+                            </tr>
+                        <?php endif ?>
                     </tbody>
                 </table>
             </div>
@@ -123,7 +104,7 @@
                 <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
                     <!-- Modal header -->
                     <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        <h3 id="modal-title" class="text-lg font-semibold text-gray-900 dark:text-white">
                             Create New Dish
                         </h3>
                         <button type="button" id="close-modal" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="crud-modal">
@@ -134,28 +115,44 @@
                         </button>
                     </div>
                     <!-- Modal body -->
-                    <form class="p-4 md:p-5">
+                    <form class="p-4 md:p-5" id="dishForm" action="" method="post">
                         <div class="grid gap-4 mb-4 grid-cols-2">
                             <div class="col-span-2">
                                 <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
-                                <input type="text" name="name" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Type dish name">
+                                <input
+                                    type="text"
+                                    name="name"
+                                    id="name"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                    placeholder="Type dish name" />
+                                <span id="nameError" class="text-red-500 text-sm hidden">Name is required.</span>
                             </div>
                             <div class="col-span-2">
                                 <label for="image" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Image</label>
-                                <input type="url" name="image" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Type image url">
+                                <input
+                                    type="url"
+                                    name="image"
+                                    id="image"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                    placeholder="Type image URL" />
+                                <span id="imageError" class="text-red-500 text-sm hidden">Please enter a valid URL.</span>
                             </div>
-
                             <div class="col-span-2">
                                 <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Dish Description</label>
-                                <textarea id="description" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write Dish description here"></textarea>
+                                <textarea
+                                    id="description"
+                                    name="description"
+                                    rows="4"
+                                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    placeholder="Write Dish description here"></textarea>
+                                <span id="descriptionError" class="text-red-500 text-sm hidden">Description is required.</span>
                             </div>
                         </div>
-                        <button type="submit" class="text-white flex items-center gap-x-1 font-semibold bg-primary hover:bg-primary/90 px-3 py-2 rounded-lg ms-auto">
-                            <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path>
-                            </svg>
-                            Create
-                        </button>
+                        <input
+                            id="modal-btn"
+                            type="submit"
+                            name="create"
+                            class="text-white flex items-center gap-x-1 font-semibold bg-primary hover:bg-primary/90 px-3 py-2 rounded-lg ms-auto"/>
                     </form>
                 </div>
             </div>
@@ -164,13 +161,82 @@
 </div>
 
 <script>
+    const modal =  document.getElementById("modal")
+    const modalTitle = document.getElementById("modal-title");
+    const modalBtn = document.getElementById("modal-btn");
+    let name = document.getElementById("name")
+    let image = document.getElementById("image")
+    let description = document.getElementById("description")
+
+
     document.getElementById("btn-modal").addEventListener("click", () => {
-        document.getElementById("modal").classList.remove("hidden");
+        modal.classList.remove("hidden");
+        modalTitle.textContent = "Create New Dish"
+        modalBtn.name = "create";
     })
 
+
+    const editDish = (data)=>{
+        modal.classList.remove("hidden");
+        modalTitle.textContent = "Update Dish"
+        modalBtn.name = "edit";
+        console.log(data)
+        name.value = data.name
+        description.value = data.description
+        image.value = data.image_url
+    }
+
     document.getElementById("close-modal").addEventListener("click", () => {
-        document.getElementById("modal").classList.add("hidden");
+        modal.classList.add("hidden");
+        name.value = "";
+        image.value = "";
+        description.value = "";
     })
+
+
+    document.getElementById("dishForm").addEventListener("submit", function(e) {
+        let isValid = true;
+
+        // Get form fields
+         name = name.value.trim();
+         image = image.value.trim();
+         description = description.value.trim();
+
+        // Get error spans
+        const nameError = document.getElementById("nameError");
+        const imageError = document.getElementById("imageError");
+        const descriptionError = document.getElementById("descriptionError");
+
+        // Reset errors
+        nameError.classList.add("hidden");
+        imageError.classList.add("hidden");
+        descriptionError.classList.add("hidden");
+
+        // Validate Name
+        if (!name) {
+            nameError.classList.remove("hidden");
+            isValid = false;
+        }
+
+        // Validate Image URL
+        const urlPattern = /^(https?:\/\/)?([\w\-]+(\.[\w\-]+)+)(\/[\w\-]*)*\/?$/;
+        if (!image || !urlPattern.test(image)) {
+            imageError.classList.remove("hidden");
+            isValid = false;
+        }
+
+        // Validate Description
+        if (!description) {
+            descriptionError.classList.remove("hidden");
+            isValid = false;
+        }
+
+        // Prevent submission if invalid
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+
 </script>
 
 
