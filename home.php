@@ -4,8 +4,9 @@ $stm = $conn->prepare("SELECT * FROM menu");
 $stm->execute();
 $res = $stm->get_result();
 if ($res->num_rows > 0) {
-    $menus = $res->fetch_assoc();
+    $menus = $res->fetch_all(MYSQLI_ASSOC);
 }
+
 ?>
 <?php include "./inc/header.php" ?>
 <header class="h-screen bg-black/90 flex flex-col">
@@ -35,10 +36,11 @@ if ($res->num_rows > 0) {
         <div class="grid md:grid-cols-2 gap-10 lg:grid-cols-3 my-20">
             <?php foreach ($menus as $menu): ?>
                 <div class="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-                    <a href="#">
-                        <img class="w-72 mb-2 mx-auto" src="<?= $menu["image"] ?>" alt="product image" />
-                    </a>
-                    <div class="px-5 pb-5">
+                    <div class="w-full relative h-[350px] bg-black flex items-center justify-center">
+                        <span class="text-white text-lg">No Image available</span>
+                        <img class="absolute inset-0 w-full z-3 h-full bg-contain" src="<?= $menu["image"] ?>" alt="product image" />
+                    </div>
+                    <div class="py-7 flex flex-col justify-between px-5 pb-5">
                         <h5 class="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white"><?= $menu["name"] ?></h5>
                         <p class="my-2 text-neutral-700"><?= $menu["description"] ?></p>
                         <div class="flex items-center justify-end mt-2">
