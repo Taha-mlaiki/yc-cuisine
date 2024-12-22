@@ -33,6 +33,7 @@ if (isset($_POST['login'])) {
             if (!password_verify($password, $data["password"])) {
                 $errors["account"] = "Email or password Invalid!";
             } else {
+                $_SESSION["id"] =  $data["id"];
                 $_SESSION["username"] =  $data["username"];
                 $_SESSION["email"] =  $data["email"];
                 $_SESSION["role"] = $data["role"];
