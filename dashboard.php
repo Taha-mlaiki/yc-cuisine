@@ -1,4 +1,32 @@
+<?php
+include "./inc/connectDB.php";
+$stm = $conn->prepare("
+    SELECT 
+        r.*, 
+        m.name AS menu_name, 
+        u.username AS user_username, 
+        u.email AS user_email 
+    FROM 
+        reservation r
+    JOIN 
+        menu m 
+    ON 
+        r.menu_id = m.id
+    JOIN 
+        user u 
+    ON 
+        r.user_id = u.id
+");
 
+
+$stm->execute();
+$res = $stm->get_result();
+if ($res->num_rows > 0) {
+    $reservations = $res->fetch_all(MYSQLI_ASSOC);
+}
+
+
+?>
 <?php include "./inc/header.php" ?>
 <div class="min-h-screen flex flex-col">
     <div class="bg-black">
@@ -84,7 +112,7 @@
                         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
                                 <th scope="col" class="px-6 py-3">
-                                    Username
+                                    user
                                 </th>
                                 <th scope="col" class="px-6 py-3">
                                     Date
@@ -104,46 +132,36 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                    Microsoft Surface Pro
-                                </th>
-                                <td class="px-6 py-4">
-                                    White
-                                </td>
-                                <td class="px-6 py-4">
-                                    Laptop PC
-                                </td>
-                                <td class="px-6 py-4">
-                                    $1999
-                                </td>
-                                <td class="px-6 py-4">
-                                    namehere
-                                </td>
-                                <td class="px-6 py-4">
-                                    <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-                                </td>
-                            </tr>
-                            <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                    Microsoft Surface Pro
-                                </th>
-                                <td class="px-6 py-4">
-                                    White
-                                </td>
-                                <td class="px-6 py-4">
-                                    Laptop PC
-                                </td>
-                                <td class="px-6 py-4">
-                                    $1999
-                                </td>
-                                <td class="px-6 py-4">
-                                    namehere
-                                </td>
-                                <td class="px-6 py-4">
-                                    <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-                                </td>
-                            </tr>
+                            <?php if (isset($reservations) || count($reservations) > 0) :  ?>
+                                <?php foreach ($reservations as $reserv): ?>
+                                    <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            <?= $reserv["user_username"]  ?>
+                                        </th>
+                                        <td class="px-6 py-4">
+                                            <?= $reserv["date"]  ?>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <?= $reserv["number_of_people"]  ?>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <?= $reserv["status"]  ?>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <?= $reserv["menu_name"]  ?>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <th colspan="100%" class="text-center text-neutral-700 w-full py-4">
+                                        No reservation available.
+                                    </th>
+                                </tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
