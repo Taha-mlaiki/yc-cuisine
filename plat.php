@@ -1,6 +1,6 @@
 <?php
 include "./inc/connectDB.php";
-include "./actions/dish/create_update.php";
+include "./actions/dishActions.php";
 $stm = $conn->prepare("SELECT * FROM dish");
 $stm->execute();
 $res = $stm->get_result();
@@ -72,7 +72,7 @@ if ($res) {
                             <?php foreach ($dishes as $dish) : ?>
                                 <tr class="bg-white items-center border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                                     <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        <img src="<?= $dish["image_url"] ?>" class="w-10 rounded-sm" alt="">
+                                        <img src="<?= $dish["image_url"] ?>" class="w-20 rounded-lg bg-contain" alt="">
                                     </th>
                                     <td class="px-6 py-4">
                                         <?= $dish["name"] ?>
@@ -82,7 +82,10 @@ if ($res) {
                                     </td>
                                     <td class=" py-5 flex items-center gap-x-2">
                                         <button onclick='editDish(<?= json_encode($dish); ?>)' class="text-white bg-green-500 px-3 py-0.5 rounded-lg">Edit</button>
-                                        <button class="text-white bg-red-500 px-3 py-0.5 rounded-lg">Delete</button>
+                                        <form action="" method="POST">
+                                            <input type="hidden" name="dish_id"  value="<?= $dish["id"] ?>">
+                                            <input class="text-white bg-red-500 px-3 py-0.5 rounded-lg cursor-pointer" type="submit"  value="Delete" name="delete">
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -117,6 +120,7 @@ if ($res) {
                     <!-- Modal body -->
                     <form class="p-4 md:p-5" id="dishForm" action="" method="post">
                         <div class="grid gap-4 mb-4 grid-cols-2">
+                            <input id="Id" name="id" type="hidden" >
                             <div class="col-span-2">
                                 <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
                                 <input
@@ -152,7 +156,7 @@ if ($res) {
                             id="modal-btn"
                             type="submit"
                             name="create"
-                            class="text-white flex items-center gap-x-1 font-semibold bg-primary hover:bg-primary/90 px-3 py-2 rounded-lg ms-auto"/>
+                            class="text-white flex items-center gap-x-1 font-semibold bg-primary hover:bg-primary/90 px-3 py-2 rounded-lg ms-auto" />
                     </form>
                 </div>
             </div>
@@ -161,7 +165,7 @@ if ($res) {
 </div>
 
 <script>
-    const modal =  document.getElementById("modal")
+    const modal = document.getElementById("modal")
     const modalTitle = document.getElementById("modal-title");
     const modalBtn = document.getElementById("modal-btn");
     let name = document.getElementById("name")
@@ -175,15 +179,15 @@ if ($res) {
         modalBtn.name = "create";
     })
 
-
-    const editDish = (data)=>{
+    let inputId = document.getElementById("Id")
+    const editDish = (data) => {
         modal.classList.remove("hidden");
         modalTitle.textContent = "Update Dish"
         modalBtn.name = "edit";
-        console.log(data)
         name.value = data.name
         description.value = data.description
         image.value = data.image_url
+        inputId.value = data.id
     }
 
     document.getElementById("close-modal").addEventListener("click", () => {
@@ -196,11 +200,10 @@ if ($res) {
 
     document.getElementById("dishForm").addEventListener("submit", function(e) {
         let isValid = true;
-
         // Get form fields
-         name = name.value.trim();
-         image = image.value.trim();
-         description = description.value.trim();
+        name = name.value.trim();
+        image = image.value.trim();
+        description = description.value.trim();
 
         // Get error spans
         const nameError = document.getElementById("nameError");
@@ -236,7 +239,6 @@ if ($res) {
             e.preventDefault();
         }
     });
-
 </script>
 
 
